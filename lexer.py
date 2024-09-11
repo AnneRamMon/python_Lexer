@@ -3,14 +3,15 @@ import re
 # Established token types
 
 token_exprs = [
+    (r'\<.*\>', 'LIBRARY'),
     (r'\d+', 'INTEGER'),
-    (r'/\*|\+|\-|>=|<=|>|<|==|!=|\*|\/', 'OPERATOR'),
-    (r'=', 'ASSIGN'),
-    (r'int|main|float|void|return|if|else|while|for|and|or|break|switch|case', 'KEYWORD'),
+    (r'/\*|\+|\-|>=|<=|>|<|==|!=|=|&&||%|\|||\*|\/', 'OPERATOR'),
+    (r'int|include|printf|main|float|void|return|if|else|while|for|break|switch|case', 'KEYWORD'),
     (r'\n', 'NEWLINE'),
-    (r'\w+', 'IDENTIFIER'),
-    (r';|.|,|{|}|\(|\)', 'PUNCTUATION'),
-
+    (r'^[a-zA-Z#&$-_]+$', 'IDENTIFIER'),
+    (r'\".*\"', 'STRING'),
+    (r'\s+', 'SPACE'),
+    (r';|.|,|{|}|\(|\)', 'PUNCTUATION')
 ]
 
 
@@ -37,7 +38,8 @@ def lexer(code_lines):
                 match = regex.match(line) # Matches the regular expression with the line
                 if match:
                     value = match.group(0) # Returns the matched string
-                    tokens.append((value, tag)) # Appends the token to the list indicating the value and the tag
+                    if tag != 'SPACE':
+                        tokens.append((value, tag)) # Appends the token to the list indicating the value and the tag
                     line = line[len(value):] # Removes the token from the line
                     break
             if not match:
