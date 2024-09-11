@@ -1,47 +1,65 @@
 import re
+import sys
 
-# Established token types
+# Establecer tipos de tokens
 token_exprs = [
-    (r'\<.*\>', 'LIBRARY'),
-    (r'\d+', 'INTEGER'),
-    (r'\+\+|--|\+|-|\*|/|>=|<=|>|<|==|!=|=|&&|\|\||%|\||\(', 'OPERATOR'),
-    (r'\bint\b|\binclude\b|\bprintf\b|\bmain\b|\bfloat\b|\bvoid\b|\breturn\b|\bif\b|\belse\b|\bwhile\b|\bfor\b|\bbreak\b|\bswitch\b|\bcase\b', 'KEYWORD'),
-    (r'\n', 'NEWLINE'),
-    (r'[a-zA-Z_][a-zA-Z_0-9]*', 'IDENTIFIER'),
-    (r'\".*?\"', 'STRING'),
-    (r'\s+', 'SPACE'),
-    (r';|\.|,|{|}|\(|\)', 'PUNCTUATION')
+    (r"\<.*\>", "LIBRARY"),
+    (r"\d+", "INTEGER"),
+    (r"\+\+|--|\+|-|\*|/|>=|<=|>|<|==|!=|=|&&|\|\||%|\||\(", "OPERATOR"),
+    (
+        r"\bint\b|\binclude\b|\bprintf\b|\bmain\b|\bfloat\b|\bvoid\b|\breturn\b|\bif\b|\belse\b|\bwhile\b|\bfor\b|\bbreak\b|\bswitch\b|\bcase\b",
+        "KEYWORD",
+    ),
+    (r"\n", "NEWLINE"),
+    (r"[a-zA-Z_][a-zA-Z_0-9]*", "IDENTIFIER"),
+    (r"\".*?\"", "STRING"),
+    (r"\s+", "SPACE"),
+    (r";|\.|,|{|}|\(|\)", "PUNCTUATION"),
 ]
 
-print("Enter the code: ")
+# Compilar expresiones regulares una vez
+token_exprs = [(re.compile(pattern), tag) for pattern, tag in token_exprs]
 
-code_lines = []
-while True:
-    line = input()
-    if line == "":
-        break
-    code_lines.append(line)
 
-# This function will take the code lines and return the tokens
+# Función para analizar cadenas de código
 def lexer(code_lines):
     tokens = []
     for line in code_lines:
         while line:
             match = None
-            for token_expr in token_exprs: 
-                pattern, tag = token_expr 
-                regex = re.compile(pattern) # Compiles the regular expression
-                match = regex.match(line) # Matches the regular expression with the line
+            for regex, tag in token_exprs:
+                match = regex.match(line)
                 if match:
-                    value = match.group(0) # Returns the matched string
-                    if tag != 'SPACE':
-                        tokens.append((value, tag)) # Appends the token to the list indicating the value and the tag
-                    line = line[len(value):] # Removes the token from the line
+                    value = match.group(0)
+                    if tag != "SPACE":
+                        tokens.append((value, tag))
+                    line = line[len(value) :]
                     break
             if not match:
-                print(f"Error: {line}")
+                print(f"Error: Unrecognized token: {line}")
                 break
     return tokens
 
-print("Tokens: ")
-print(lexer(code_lines))
+
+def main():
+    if len(sys.argv) != 2:
+        print(f"Usage: {sys.argv[0]} <file.c>")
+        sys.exit(1)
+
+    filename = sys.argv[1]
+
+    try:
+        with open(filename, "r") as file:
+            code_lines = file.readlines()
+    except IOError as e:
+        print(f"Error reading file {filename}: {e}")
+        sys.exit(1)
+
+    tokens = lexer(code_lines)
+    print("Tokens:")
+    for token in tokens:
+        print(token)
+
+
+if __name__ == "__main__":
+    main()
