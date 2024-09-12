@@ -9,13 +9,14 @@ from PIL import ImageGrab
 token_exprs = [
     (r"auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while|printf|include", "KEYWORD"),
     (r"[a-zA-Z_][a-zA-Z_0-9]*", "IDENTIFIER"),
-    (r"\+|\-|\*|\/|\%|\=\=|\!\=|\>|\>\=|\<|\<\=|\&\&|\|\||\=", "OPERATOR"),
+    (r"\s*<[^>]*>|\<.*?\>", "OTHER"),
+    (r"\+|\-|\*|\/|\%|\=\=|\!\=|\>|\>\=|\<|\<\=|\&\&|\|\||\=|\<\<|\>\>|\<\<\=|\>\>\=", "OPERATOR"),
     #COMMENT
     (r"\/\/.*", "COMMENT"),
     (r"\b[0-9]+\b|\d+", "CONSTANT"),
     (r"\".*?\"", "LITERAL"),
     (r"\;|\,|\:|\[|\]|\(|\)|\{|\}", "PUNCTUATION"),
-    (r"\\n|\\t|\\r|\\b|\\a|\\f|\\v|\$|\°|\<.*?\>|\#|\s*<[^>]*>|\&", "SPECIAL CHARACTERS"),
+    (r"\\n|\\t|\\r|\\b|\\a|\\f|\\v|\$|\°|\#|\&", "SPECIAL CHARACTERS"),
     (r"\s+", "SPACE"),
     (r"\n", "NEWLINE"),
 ]
@@ -25,7 +26,11 @@ token_exprs = [(re.compile(pattern), tag) for pattern, tag in token_exprs]
 
 def lexer(code_lines):
     tokens = []
-    seen_tokens = set()  # Conjunto para llevar un registro de tokens ya vistos
+    seen_tokens = set()  # Set to track unique tokens
+    total_token_count = 0  # Counter for all valid tokens generated
+
+    # Define the token types to exclude from counting and adding
+    excluded_tags = {"COMMENT", "NEWLINE", "SPACE", "OTHER"}
 
     for line in code_lines:
         while line:
@@ -34,27 +39,30 @@ def lexer(code_lines):
                 match = regex.match(line)
                 if match:
                     value = match.group(0)
-                    if tag != "SPACE":
-                        token = (value, tag)
+                    token = (value, tag)
+
+                    # Only increment token count and track tokens if not excluded
+                    if tag not in excluded_tags:
+                        total_token_count += 1  # Count every valid token
+                        # Add to seen tokens only if not already seen
                         if token not in seen_tokens:
-                            tokens.append(token)
                             seen_tokens.add(token)
-                    line = line[len(value):]
+                    
+                    line = line[len(value):]  # Move to the next part of the line
                     break
             if not match:
                 print(f"Error: Unrecognized token: {line}")
                 break
 
-    return tokens
+    return total_token_count, seen_tokens
 
-
-def show_token_summary(tokens):
+def show_token_summary(num_tokens, tokens):
     token_count = defaultdict(int)
     token_list_by_category = defaultdict(list)
-    total_tokens = len(tokens)
+    total_tokens = num_tokens
 
     for value, tag in tokens:
-        if tag not in ["SPACE", "NEWLINE", "COMMENT"]:
+        if tag not in ["SPACE", "NEWLINE", "COMMENT", "OTHER"]:
             token_count[tag] += 1
             token_list_by_category[tag].append(value)
 
@@ -119,8 +127,8 @@ def main():
         print(f"Error reading file {filename}: {e}")
         sys.exit(1)
 
-    tokens = lexer(code_lines)
-    show_token_summary(tokens)
+    num_tokens, tokens = lexer(code_lines)
+    show_token_summary(num_tokens, tokens)
 
 if __name__ == "__main__":
     main()
