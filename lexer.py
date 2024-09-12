@@ -14,21 +14,21 @@ token_exprs = [
     #KEYWORDS
     (r"auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while|printf|include", "KEYWORD"),
     #IDENTIFIER
-    (r"[a-zA-Z_][a-zA-Z_0-9]*", "IDENTIFIER"),
+    (r"[a-zA-Z_$][a-zA-Z_$0-9]*", "IDENTIFIER"),
     #OTHERS
     (r"\s*<[^>]*>|\<.*?\>", "OTHER"),
     #OPERATORS
-    (r"\+|\-|\*|\/|\%|\=\=|\!\=|\>|\>\=|\<|\<\=|\&\&|\|\||\=|\<\<|\>\>|\<\<\=|\>\>\=", "OPERATOR"),
+    (r"\+|\-|\*|\/|\%|\=\=|\!\=|\>|\>\=|\<|\<\=|\&\&|\|\||\=|\<\<|\>\>|\<\<\=|\>\>\=|\?|\:", "OPERATOR"),
     #COMMENT
     (r"\/\/.*", "COMMENT"),
     #CONSTANT
     (r"\b[0-9]+\b|\d+", "CONSTANT"),
     #LITERAL
-    (r"\".*?\"", "LITERAL"),
+    (r"\".*?\"|\'.\'", "LITERAL"),
     #PUNCTUATION
     (r"\;|\,|\:|\[|\]|\(|\)|\{|\}", "PUNCTUATION"),
     #SPECIAL CHARACTERS
-    (r"\\n|\\t|\\r|\\b|\\a|\\f|\\v|\$|\°|\#|\&", "SPECIAL CHARACTERS"),
+    (r"\°|\#|\&", "SPECIAL CHARACTERS"),
     #SPACE
     (r"\s+", "SPACE"),
     #NEWLINE
