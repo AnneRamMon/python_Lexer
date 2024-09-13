@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import re # Regular Expressions
 import sys # System-specific parameters and functions
 from collections import defaultdict # Container datatypes
